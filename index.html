@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>es6-classes</title>
+    </head>
+
+    <body>
+        <div class="menu food-menu">
+            <h2>Pick a food</h2>
+            <ul>
+                <li>Hamburger</li>
+                <li>French Fries</li>
+                <li>Ice Cream</li>
+            </ul>
+        </div>
+        <div class="menu drink-menu">
+            <h2>Pick a drink</h2>
+            <ul>
+                <li>Chocolate Milk</li>
+                <li>Coca Cola</li>
+                <li>Apple Juice</li>
+            </ul>
+        </div>
+    </body>
+
+    <script>
+        class Menu {
+            constructor(wrapperClassName) {
+               this.wrapperName = wrapperClassName,
+               this.wrapperNode,
+               this.listNode,
+               this.listArray = [],
+               this.selectNode
+            };
+
+            getWrapperNode() {
+                this.wrapperNode = document.querySelector(`.${this.wrapperName}`);
+            };
+
+            getListNode() {
+                this.listNode = (this.wrapperNode).querySelector("ul");
+            };
+
+            getListItemsAsArray() {
+                const items = this.listNode.getElementsByTagName("li");
+                let array = [];
+                
+                Array.from(items).forEach((i) => { 
+                    array.push(i.innerHTML) 
+                });
+             
+                this.listArray = array;
+            };
+
+            insertSelectNode() {
+                const node = document.createElement("select");
+
+                (this.wrapperNode).appendChild(node);
+                this.selectNode = (this.wrapperNode).querySelector("select");
+            };
+
+            removeListNode() {
+                (this.wrapperNode).removeChild(this.listNode);
+            };
+
+            generateSelectOptions() {
+                let markup;
+
+                (this.listArray).forEach((i) => {
+                    let node = document.createElement("option");
+
+                    node.innerHTML = i;
+                    (this.selectNode).appendChild(node);
+                });
+
+                this.removeListNode();
+            };
+
+            createSelect() {
+                this.getWrapperNode();
+                this.getListNode();
+                this.getListItemsAsArray();
+                this.insertSelectNode();
+                this.generateSelectOptions();
+            };
+        };
+
+        (() => {
+            const drinks = new Menu("drink-menu");
+            drinks.createSelect();
+
+            // const food = new Menu("food-menu");
+            // food.createSelect();
+        })();
+    </script>
+</html>
