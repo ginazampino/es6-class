@@ -2,95 +2,187 @@
 <html>
     <head>
         <title>es6-classes</title>
+        <style>
+            body {
+                padding: 20px;
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                width: 200px;
+            }
+
+            li {
+                padding: 5px;
+                border-bottom: 2px solid transparent;
+            }
+
+            li, li * {
+                user-select: none;
+            }
+
+            li:hover {
+                background-color: gainsboro;
+            }
+
+            li.active {
+                border-bottom: 2px solid black;
+            }
+
+            .hidden {
+                display: none;
+            }
+        </style>
     </head>
 
     <body>
-        <div class="menu food-menu">
-            <h2>Pick a food</h2>
-            <ul>
-                <li>Hamburger</li>
-                <li>French Fries</li>
-                <li>Ice Cream</li>
-            </ul>
-        </div>
-        <div class="menu drink-menu">
-            <h2>Pick a drink</h2>
-            <ul>
-                <li>Chocolate Milk</li>
-                <li>Coca Cola</li>
-                <li>Apple Juice</li>
-            </ul>
+        <div class="container">
+            <nav>
+                <ul class="hidden">
+                    <li class="active blue">
+                        <a href="#">Vikings</a>
+                    </li>
+                    <li>
+                        <a href="#">Romans</a>
+                    </li>
+                    <li>
+                        <a href="#">Egyptians</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </body>
 
     <script>
-        class Menu {
-            constructor(wrapperClassName) {
-               this.wrapperName = wrapperClassName,
-               this.wrapperNode,
-               this.listNode,
-               this.listArray = [],
-               this.selectNode
+        class ListDropdown {
+            constructor(className) {
+                this.wrapperClass = className,
+                this.wrapperNode,
+                this.parentNode,
+                this.listNode,
+                this.listItems,
+                this.buttonNode,
+                this.activeOption
             };
 
-            getWrapperNode() {
-                this.wrapperNode = document.querySelector(`.${this.wrapperName}`);
+            assignWrapperNode() {
+                const node = document.querySelector(`.${this.wrapperClass}`);
+
+                if (node) {
+                    this.wrapperNode = node;
+                } else return;
             };
 
-            getListNode() {
-                this.listNode = (this.wrapperNode).querySelector("ul");
+            assignParentNode() {
+                this.parentNode = (this.listNode).parentNode;
             };
 
-            getListItemsAsArray() {
-                const items = this.listNode.getElementsByTagName("li");
-                let array = [];
-                
-                Array.from(items).forEach((i) => { 
-                    array.push(i.innerHTML) 
+            validateWrapper() {
+                if (this.wrapperClass) {
+                    this.assignWrapperNode();
+                } else return;
+            };
+
+            validateList() {
+                const node = (this.wrapperNode).querySelector("ul");
+
+                if (node) {
+                    this.listNode = node;
+                    this.assignParentNode();
+                } else return;
+            };
+
+            validateListItems() {
+                const items = (this.listNode).querySelectorAll("li");
+
+                if (items.length > 0) {
+                    this.listItems = items;
+                } else return;
+            };
+
+            validateNodes() {
+                this.validateWrapper();
+                this.validateList();
+                this.validateListItems();
+            };
+
+            getActiveOption() {
+                this.activeOption = (this.listNode).querySelector(".active").innerText;
+            };
+
+            insertButton(node) {
+                (this.parentNode).insertBefore(node, this.listNode);
+            };
+
+            createButton() {
+                const node = document.createElement("button");
+
+                node.classList.add("toggle");
+                this.getActiveOption();
+                node.innerHTML = this.activeOption;
+                this.insertButton(node);
+                this.buttonNode = (this.parentNode).querySelector("button");
+            };
+
+            toggleActiveState(option) {
+                this.activeOption = option.innerText;
+                this.buttonNode.innerHTML = this.activeOption;
+                this.toggleVisibleState();
+            };
+
+            toggleVisibleState() {
+                if ((this.listNode).classList.contains("hidden")) {
+                        (this.listNode).classList.remove("hidden");
+                } else (this.listNode).classList.add("hidden");
+            };
+
+            watchButtonClick() {
+                (this.buttonNode).addEventListener("click", () => {
+                   this.toggleVisibleState();
                 });
-             
-                this.listArray = array;
             };
 
-            insertSelectNode() {
-                const node = document.createElement("select");
-
-                (this.wrapperNode).appendChild(node);
-                this.selectNode = (this.wrapperNode).querySelector("select");
-            };
-
-            removeListNode() {
-                (this.wrapperNode).removeChild(this.listNode);
-            };
-
-            generateSelectOptions() {
-                let markup;
-
-                (this.listArray).forEach((i) => {
-                    let node = document.createElement("option");
-
-                    node.innerHTML = i;
-                    (this.selectNode).appendChild(node);
+            watchListChanges() {
+                (this.listItems).forEach((item) => {
+                    item.addEventListener("click", () => {
+                        this.toggleActiveState(item);
+                    });
                 });
-
-                this.removeListNode();
             };
 
-            createSelect() {
-                this.getWrapperNode();
-                this.getListNode();
-                this.getListItemsAsArray();
-                this.insertSelectNode();
-                this.generateSelectOptions();
+            generateDropdown() {
+                console.log("Creating...");
+
+                this.validateNodes();
+                this.createButton();
+                this.watchListChanges();
+                this.watchButtonClick();
             };
         };
 
-        (() => {
-            const drinks = new Menu("drink-menu");
-            drinks.createSelect();
 
-            // const food = new Menu("food-menu");
-            // food.createSelect();
-        })();
+        document.addEventListener("DOMContentLoaded", () => {
+            /* =========================================== */
+            const list = document.querySelector("ul");
+            const listItems = list.querySelectorAll("li");
+            const toggleActive = (target) => {
+                listItems.forEach((item) => {
+                    item.classList.remove("active");
+                });
+
+                target.classList.add("active");
+            };
+            listItems.forEach((item) => {
+                item.addEventListener("click", () => {
+                    toggleActive(item);
+                });
+            });
+            /* ============================================ */
+
+            const element = new ListDropdown("container");
+            element.generateDropdown();
+        });
     </script>
 </html>
